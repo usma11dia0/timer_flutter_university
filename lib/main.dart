@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:timer_flutter_university/next_page.dart';
 
 void main() {
   runApp(const App());
@@ -33,18 +34,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _second = 0;
+  late Timer _timer;
+  bool _isRunning = false;
 
   @override
   void initState() {
     super.initState();
-
-    Timer.periodic(
-      const Duration(seconds: 1), (timer) {
-        setState(() {
-          _second++;
-        });
-      },
-    );
   }
 
   @override
@@ -55,11 +50,75 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Text(
-          '$_second',
-          style: const TextStyle(fontSize: 64),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              '$_second',
+              style: const TextStyle(fontSize: 100),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                toggleTimer();
+              }, 
+              child: Text(
+                _isRunning ? 'ストップ' : 'スタート',
+                style: TextStyle(
+                  color: _isRunning ? Colors.red : Colors.green,
+                  fontWeight: FontWeight.bold,
+                  ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                resetTimer();
+              }, 
+              child: const Text(
+                'リセット',
+                style: TextStyle(
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
+                  ),
+              ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+
+  void toggleTimer(){
+    if (_isRunning) {
+      _timer.cancel();
+    } else {
+      _timer = Timer.periodic(
+        const Duration(seconds: 1), (timer) {
+          setState(() {
+            _second++;
+          });
+
+          if (_second == 10) {
+            resetTimer();
+ 
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const NextPage()),
+            );
+          }
+        },
+      );
+    }
+    setState((){
+      _isRunning = !_isRunning;
+    });
+  }
+
+  void resetTimer() {
+    _timer.cancel();
+    setState(() {
+      _second = 0;
+      _isRunning = false;
+      },
     );
   }
 }
